@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookmarkFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+  <style>
+    /* Side panel overrides – fill the full panel height */
+    body {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100vh;
+      max-height: 100vh;
+    }
+    #app { height: 100vh; }
+    .tab-content { max-height: none; }
+  </style>
+</head>
+<body>
+  <!-- Reuse the exact same app markup as popup.html -->
+  <div id="app">
+    <header class="app-header">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="BookmarkFlow" class="logo-icon" />
+        <div class="logo-text">
+          <span class="logo-name">BookmarkFlow</span>
+          <span class="logo-tagline">AI Bookmark Organizer</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="run" id="tab-run" role="tab" aria-selected="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        Run
+      </button>
+      <button class="tab-btn" data-tab="preview" id="tab-preview" role="tab" aria-selected="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Preview
+        <span class="badge" id="preview-badge" style="display:none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="settings" id="tab-settings" role="tab" aria-selected="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Settings
+      </button>
+    </nav>
+
+    <section class="tab-content active" id="tab-content-run" role="tabpanel">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">—</span>
+          <span class="stat-label">Total Bookmarks</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value accent-warning" id="stat-duplicates">—</span>
+          <span class="stat-label">Duplicates</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value accent-danger" id="stat-untitled">—</span>
+          <span class="stat-label">No Title</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value accent-teal" id="stat-folders">—</span>
+          <span class="stat-label">Folders</span>
+        </div>
+      </div>
+
+      <div class="action-stack">
+        <button id="scan-btn" class="btn btn-primary btn-large">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Scan Bookmarks
+        </button>
+        <button id="analyze-btn" class="btn btn-gradient btn-large" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Analyze with AI
+        </button>
+        <div class="backup-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="backup-checkbox" checked />
+            <span class="checkbox-custom"></span>
+            Create backup before applying changes
+          </label>
+          <button id="backup-btn" class="btn btn-ghost btn-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Now
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-section" id="progress-section" style="display:none;">
+        <div class="progress-header">
+          <span id="progress-label" class="progress-label">Scanning…</span>
+          <span id="progress-pct" class="progress-pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="progress-detail" class="progress-detail"></p>
+      </div>
+
+      <div class="log-box" id="log-box" style="display:none;">
+        <div class="log-header">
+          <span>Activity Log</span>
+          <button id="clear-log-btn" class="icon-btn-sm">✕</button>
+        </div>
+        <div class="log-entries" id="log-entries"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-content-preview" role="tabpanel">
+      <div class="preview-toolbar">
+        <span id="preview-count-label" class="preview-count">No changes to preview</span>
+        <div class="preview-actions">
+          <button id="select-all-btn" class="btn btn-ghost btn-xs">Select All</button>
+          <button id="deselect-all-btn" class="btn btn-ghost btn-xs">Deselect</button>
+        </div>
+      </div>
+      <div class="diff-list" id="diff-list">
+        <div class="empty-state" id="diff-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <p>Run an analysis first to see proposed changes.</p>
+        </div>
+      </div>
+      <div class="preview-footer" id="preview-footer" style="display:none;">
+        <div class="footer-info">
+          <span id="selected-count">0 selected</span>
+        </div>
+        <button id="apply-btn" class="btn btn-success btn-large" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
+          Apply Changes
+        </button>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-content-settings" role="tabpanel">
+      <div class="settings-scroll">
+        <div class="settings-group">
+          <h3 class="settings-group-title">AI Provider</h3>
+          <div class="field-group">
+            <label class="field-label" for="provider-select">Provider</label>
+            <select id="provider-select" class="field-select">
+              <option value="gemini">Google Gemini (AI Studio)</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="groq">Groq</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="api-key-input">API Key</label>
+            <div class="input-row">
+              <input type="password" id="api-key-input" class="field-input" placeholder="Paste your API key here…" autocomplete="off" />
+              <button id="toggle-key-visibility" class="icon-btn" title="Show/hide key">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <p class="field-hint">Stored locally in <code>chrome.storage.local</code>.</p>
+          </div>
+          <div class="field-group" id="model-field">
+            <label class="field-label" for="model-select">Model</label>
+            <select id="model-select" class="field-select">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            </select>
+          </div>
+          <div class="field-group" id="custom-model-field" style="display:none;">
+            <label class="field-label" for="custom-model-input">Custom Model ID</label>
+            <input type="text" id="custom-model-input" class="field-input" placeholder="e.g. google/gemini-flash-1.5:free" />
+          </div>
+          <button id="test-api-btn" class="btn btn-outline btn-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+            </svg>
+            Test Connection
+          </button>
+          <span id="api-status" class="api-status"></span>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group-title">Behavior Rules</h3>
+          <div class="field-group">
+            <label class="field-label" for="batch-size-input">Batch Size</label>
+            <input type="number" id="batch-size-input" class="field-input field-input-sm" min="10" max="100" value="40" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="max-categories-input">Max Top-level Categories</label>
+            <input type="number" id="max-categories-input" class="field-input field-input-sm" min="3" max="15" value="8" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="max-depth-input">Max Folder Depth</label>
+            <input type="number" id="max-depth-input" class="field-input field-input-sm" min="1" max="5" value="3" />
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group-title">Folder Rules</h3>
+          <div class="field-group">
+            <label class="field-label" for="protect-folders-input">Protected Folders</label>
+            <input type="text" id="protect-folders-input" class="field-input" placeholder="Work, Personal, Archive" />
+            <p class="field-hint">Comma-separated. Bookmarks inside won't be moved.</p>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="custom-prompt-input">Custom Instructions for AI</label>
+            <textarea id="custom-prompt-input" class="field-textarea" rows="3" placeholder="e.g. Group all dev tools under 'Dev Resources'."></textarea>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group-title">Appearance</h3>
+          <div class="field-group">
+            <label class="field-label">Theme</label>
+            <div class="theme-toggle-group">
+              <button class="theme-btn active" data-theme="dark" id="theme-dark">🌙 Dark</button>
+              <button class="theme-btn" data-theme="light" id="theme-light">☀️ Light</button>
+              <button class="theme-btn" data-theme="auto" id="theme-auto">🖥 Auto</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="save-settings-btn" class="btn btn-primary btn-full">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17,21 17,13 7,13 7,21"/>
+            <polyline points="7,3 7,8 15,8"/>
+          </svg>
+          Save Settings
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast-container" aria-live="polite"></div>
+  <div class="modal-backdrop" id="confirm-modal" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <h2 class="modal-title" id="modal-title">Confirm Action</h2>
+      <p class="modal-body" id="modal-body">Are you sure?</p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-confirm" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
