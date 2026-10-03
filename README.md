@@ -37,7 +37,7 @@
 3. Click **"Create API Key"**
 4. Copy the key (starts with `AIza…`)
 
-> **Free tier limits:** Gemini 3.8 Flash allows ~15 requests/minute and 1 million tokens/day on the free tier — more than enough for organizing thousands of bookmarks.
+> **Free tier limits:** Gemini 1.5 Flash allows ~15 requests/minute and 1 million tokens/day on the free tier — more than enough for organizing thousands of bookmarks.
 
 ### Step 3 – Configure BookmarkFlow
 
