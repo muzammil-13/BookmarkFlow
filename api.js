@@ -157,7 +157,7 @@ async function _dispatchCall(batch, settings) {
 // ── Gemini ─────────────────────────────────────
 
 async function _callGemini(batch, settings) {
-  const model    = settings.model || 'gemini-2.5-flash';
+  const model    = settings.model || 'gemini-3.8-flash';
   const endpoint = GEMINI_ENDPOINT
     .replace('{MODEL}', model)
     .replace('{KEY}',   settings.apiKey);

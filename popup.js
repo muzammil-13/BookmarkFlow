@@ -128,7 +128,7 @@ async function loadSettings() {
   state.settings = Object.assign({
     provider:         'gemini',
     apiKey:           '',
-    model:            'gemini-2.5-flash',
+    model:            'gemini-3.8-flash',
     customModel:      '',
     batchSize:        40,
     maxCategories:    8,
@@ -141,7 +141,7 @@ async function loadSettings() {
   // Populate fields
   dom.providerSelect.value      = state.settings.provider;
   dom.apiKeyInput.value         = state.settings.apiKey;
-  dom.modelSelect.value         = state.settings.model || 'gemini-2.5-flash';
+  dom.modelSelect.value         = state.settings.model || 'gemini-3.8-flash';
   dom.customModelInput.value    = state.settings.customModel;
   dom.batchSizeInput.value      = state.settings.batchSize;
   dom.maxCategoriesInput.value  = state.settings.maxCategories;
