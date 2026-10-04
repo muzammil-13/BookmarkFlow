@@ -116,7 +116,8 @@ export async function testConnection(settings) {
     { id: 'test-1', title: 'Google', url: 'https://google.com' },
     { id: 'test-2', title: 'YouTube', url: 'https://youtube.com' },
   ];
-  await _callLLMWithRetry(dummies, settings);
+  // Bypass retries for testing so it fails fast in the UI
+  await _dispatchCall(dummies, settings);
   return true; // throws on failure
 }
 
@@ -216,7 +217,9 @@ async function _callGemini(batch, settings) {
 // ── OpenAI-compatible (OpenRouter / Groq) ──────
 
 async function _callOpenAICompatible(batch, settings, endpoint, defaultModel) {
-  const model      = settings.customModel?.trim() || defaultModel;
+  let model = settings.customModel?.trim() || defaultModel;
+  model = model.replace(/^`+|`+$/g, ''); // strip markdown backticks if accidentally copied
+  
   const systemText = _buildSystemInstruction(settings);
   const userText   = _buildUserPrompt(batch);
 
