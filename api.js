@@ -18,7 +18,7 @@ const GROQ_ENDPOINT       = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Default free-tier models for OpenRouter / Groq
 const OPENROUTER_DEFAULT_MODEL = 'google/gemini-flash-1.5:free';
-const GROQ_DEFAULT_MODEL       = 'llama3-70b-8192';
+const GROQ_DEFAULT_MODEL       = 'llama-3.1-8b-instant';
 
 /** System instruction passed to the LLM */
 const SYSTEM_INSTRUCTION = `You are a professional bookmark organizer assistant.
@@ -56,7 +56,7 @@ Bookmarks (id | title | url):
 // ─────────────────────────────────────────────
 
 let _lastCallTime = 0;
-const MIN_CALL_INTERVAL_MS = 1500; // avoid hammering free tier
+const MIN_CALL_INTERVAL_MS = 4100; // 60s / 15 requests/min = 4s min interval for free tier
 
 // ─────────────────────────────────────────────
 // Public API
@@ -70,12 +70,13 @@ const MIN_CALL_INTERVAL_MS = 1500; // avoid hammering free tier
  * @param {function(number, number, string)} onProgress – (done, total, msg)
  * @returns {Promise<Array<{id, suggested_folder_path, cleaned_title}>>}
  */
-export async function analyzeBookmarks(bookmarks, settings, onProgress) {
+export async function analyzeBookmarks(bookmarks, settings, onProgress, resumeState = null) {
   const batchSize  = settings.batchSize  || 40;
-  const results    = [];
+  let results      = resumeState ? resumeState.results : [];
+  let startIndex   = resumeState ? resumeState.startIndex : 0;
   const totalBatches = Math.ceil(bookmarks.length / batchSize);
 
-  for (let i = 0; i < bookmarks.length; i += batchSize) {
+  for (let i = startIndex; i < bookmarks.length; i += batchSize) {
     const batchIndex = Math.floor(i / batchSize) + 1;
     const batch = bookmarks.slice(i, i + batchSize);
 
@@ -85,11 +86,22 @@ export async function analyzeBookmarks(bookmarks, settings, onProgress) {
     const batchResult = await _callLLMWithRetry(batch, settings);
     results.push(...batchResult);
 
+    // Save partial progress to local storage so we can resume if the popup closes
+    await chrome.storage.local.set({
+      bf_partial_analysis: {
+        results: results,
+        startIndex: i + batchSize
+      }
+    });
+
     // Respectful delay between batches
     if (i + batchSize < bookmarks.length) {
       await _sleep(MIN_CALL_INTERVAL_MS);
     }
   }
+
+  // Clear temp storage when fully complete
+  await chrome.storage.local.remove('bf_partial_analysis');
 
   onProgress?.(bookmarks.length, bookmarks.length, 'Analysis complete.');
   return results;
@@ -127,12 +139,12 @@ async function _callLLMWithRetry(batch, settings, attempt = 1) {
   try {
     return await _dispatchCall(batch, settings);
   } catch (err) {
-    if (attempt >= 4) throw err;
+    if (attempt >= 7) throw err;
 
     const isRetryable = err.status === 429 || (err.status >= 500 && err.status < 600);
     if (!isRetryable) throw err;
 
-    const delay = Math.min(2 ** attempt * 1500, 30_000);
+    const delay = Math.min(2 ** attempt * 1500, 60_000); // Backoff up to 60s
     console.warn(`[BookmarkFlow] API call failed (${err.status}), retrying in ${delay}ms…`);
     await _sleep(delay);
     return _callLLMWithRetry(batch, settings, attempt + 1);
@@ -157,7 +169,7 @@ async function _dispatchCall(batch, settings) {
 // ── Gemini ─────────────────────────────────────
 
 async function _callGemini(batch, settings) {
-  const model    = settings.model || 'gemini-1.5-flash';
+  const model    = settings.model || 'gemini-flash-latest';
   const endpoint = GEMINI_ENDPOINT
     .replace('{MODEL}', model)
     .replace('{KEY}',   settings.apiKey);

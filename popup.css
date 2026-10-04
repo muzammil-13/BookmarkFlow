@@ -8,10 +8,10 @@
 
 /* ── Design Tokens ── */
 :root {
-  --teal:        #00D4AA;
-  --teal-dark:   #00A88A;
-  --purple:      #7C3AED;
-  --purple-light:#9D60FF;
+  --teal:        #8AD6D1;
+  --teal-dark:   #359FA0;
+  --purple:      #FF8C52;
+  --purple-light:#FFF0C5;
   --blue:        #3B82F6;
   --green:       #22C55E;
   --amber:       #F59E0B;
@@ -278,7 +278,7 @@ body {
 .btn-primary:hover:not(:disabled) {
   background: var(--teal-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,212,170,0.4);
+  box-shadow: 0 4px 16px rgba(138,214,209,0.4);
 }
 
 .btn-gradient {
@@ -297,7 +297,7 @@ body {
 .btn-gradient:hover:not(:disabled)::after { background: rgba(255,255,255,0.12); }
 .btn-gradient:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  box-shadow: 0 4px 20px rgba(255,140,82,0.4);
 }
 
 .btn-success {
@@ -565,8 +565,8 @@ body {
 .diff-item:hover { border-color: var(--border-strong); }
 
 .diff-item.selected {
-  border-color: rgba(0, 212, 170, 0.4);
-  background: rgba(0, 212, 170, 0.05);
+  border-color: rgba(138, 214, 209, 0.4);
+  background: rgba(138, 214, 209, 0.05);
 }
 
 .diff-item.excluded {
@@ -744,7 +744,7 @@ body {
 
 .field-input:focus, .field-select:focus, .field-textarea:focus {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(0,212,170,0.12);
+  box-shadow: 0 0 0 3px rgba(138,214,209,0.12);
 }
 
 .field-input-sm { width: 90px; }

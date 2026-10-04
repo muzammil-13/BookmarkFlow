@@ -37,7 +37,7 @@
 3. Click **"Create API Key"**
 4. Copy the key (starts with `AIza…`)
 
-> **Free tier limits:** Gemini 1.5 Flash allows ~15 requests/minute and 1 million tokens/day on the free tier — more than enough for organizing thousands of bookmarks.
+> **Free tier limits:** Gemini Flash Latest allows ~15 requests/minute and 1 million tokens/day on the free tier — more than enough for organizing thousands of bookmarks.
 
 ### Step 3 – Configure BookmarkFlow
 
@@ -76,7 +76,7 @@ OpenRouter provides access to many free models including Gemini Flash:
 2. Generate an API key
 3. In BookmarkFlow Settings → select **"Groq"** as provider
 4. Enter your Groq API key
-5. Model defaults to `llama3-70b-8192`
+5. Model defaults to `llama-3.1-8b-instant`
 
 ### Protected Folders
 

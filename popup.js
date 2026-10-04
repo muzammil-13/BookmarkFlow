@@ -128,7 +128,7 @@ async function loadSettings() {
   state.settings = Object.assign({
     provider:         'gemini',
     apiKey:           '',
-    model:            'gemini-1.5-flash',
+    model:            'gemini-flash-latest',
     customModel:      '',
     batchSize:        40,
     maxCategories:    8,
@@ -138,10 +138,15 @@ async function loadSettings() {
     theme:            'dark',
   }, stored.bf_settings || {});
 
+  // Auto-migrate deprecated or high-demand models to the most stable one
+  if (['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-3.8-flash'].includes(state.settings.model)) {
+    state.settings.model = 'gemini-flash-latest';
+  }
+
   // Populate fields
   dom.providerSelect.value      = state.settings.provider;
   dom.apiKeyInput.value         = state.settings.apiKey;
-  dom.modelSelect.value         = state.settings.model || 'gemini-1.5-flash';
+  dom.modelSelect.value         = state.settings.model || 'gemini-flash-latest';
   dom.customModelInput.value    = state.settings.customModel;
   dom.batchSizeInput.value      = state.settings.batchSize;
   dom.maxCategoriesInput.value  = state.settings.maxCategories;
@@ -204,13 +209,15 @@ function bindEvents() {
     });
   });
 
-  // Side panel opener
-  dom.openSidepanelBtn.addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (chrome.sidePanel?.open) {
-      await chrome.sidePanel.open({ tabId: tab.id });
-    }
-  });
+  // Side panel opener (only exists in popup.html)
+  if (dom.openSidepanelBtn) {
+    dom.openSidepanelBtn.addEventListener('click', async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (chrome.sidePanel?.open) {
+        await chrome.sidePanel.open({ tabId: tab.id });
+      }
+    });
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -290,10 +297,6 @@ async function handleAnalyze() {
     return;
   }
 
-  state.isAnalyzing = true;
-  dom.analyzeBtn.disabled = true;
-  dom.analyzeBtn.classList.add('btn-loading');
-
   // Determine which bookmarks are protected
   const protectedNames = state.settings.protectedFolders
     ? state.settings.protectedFolders.split(',').map(s => s.trim()).filter(Boolean)
@@ -302,9 +305,33 @@ async function handleAnalyze() {
 
   // Filter to only bookmarks that can be moved
   const eligible = state.bookmarks.filter(b => !protectedIds.has(b.id));
+  
+  if (eligible.length === 0) {
+    toast('No eligible bookmarks to analyze.', 'info');
+    return;
+  }
+
+  // Check for temp storage to resume
+  const { bf_partial_analysis } = await chrome.storage.local.get('bf_partial_analysis');
+  let resumeState = null;
+
+  if (bf_partial_analysis && bf_partial_analysis.startIndex > 0 && bf_partial_analysis.startIndex < eligible.length) {
+    const doResume = confirm(`You have an incomplete analysis (${bf_partial_analysis.startIndex} / ${eligible.length} done). Resume from where you left off?\n\n(Click Cancel to restart from the beginning)`);
+    if (doResume) {
+      resumeState = bf_partial_analysis;
+    } else {
+      await chrome.storage.local.remove('bf_partial_analysis');
+    }
+  } else if (bf_partial_analysis) {
+    await chrome.storage.local.remove('bf_partial_analysis');
+  }
+
+  state.isAnalyzing = true;
+  dom.analyzeBtn.disabled = true;
+  dom.analyzeBtn.classList.add('btn-loading');
 
   log(`Analyzing ${eligible.length} eligible bookmarks (${protectedIds.size} protected)…`);
-  showProgress('Sending bookmarks to AI…', 0);
+  showProgress(resumeState ? 'Resuming AI analysis…' : 'Sending bookmarks to AI…', 0);
 
   try {
     const results = await analyzeBookmarks(
@@ -314,7 +341,8 @@ async function handleAnalyze() {
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
         updateProgress(msg, pct);
         if (done > 0) log(msg);
-      }
+      },
+      resumeState
     );
 
     state.analysisResults = results;

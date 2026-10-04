@@ -6,19 +6,19 @@
   "author": "BookmarkFlow",
 
   "icons": {
-    "16":  "icons/icon16.png",
-    "32":  "icons/icon32.png",
-    "48":  "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16":  "icons/BookmarkFlow-logo.png",
+    "32":  "icons/BookmarkFlow-logo.png",
+    "48":  "icons/BookmarkFlow-logo.png",
+    "128": "icons/BookmarkFlow-logo.png"
   },
 
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16":  "icons/icon16.png",
-      "32":  "icons/icon32.png",
-      "48":  "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16":  "icons/BookmarkFlow-logo.png",
+      "32":  "icons/BookmarkFlow-logo.png",
+      "48":  "icons/BookmarkFlow-logo.png",
+      "128": "icons/BookmarkFlow-logo.png"
     },
     "default_title": "BookmarkFlow"
   },
