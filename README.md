@@ -7,7 +7,7 @@
 ## ✨ Features
 
 | Feature | Description |
-|---|---|
+| --- | --- |
 | 🔍 **Smart Scan** | Detects total bookmarks, duplicates, untitled items, and folder count |
 | 🤖 **AI Analysis** | Sends batches of 10–100 bookmarks to Gemini/OpenRouter/Groq |
 | 🌳 **Diff Preview** | Review every proposed move before anything is changed |
@@ -81,12 +81,14 @@ OpenRouter provides access to many free models including Gemini Flash:
 ### Protected Folders
 
 In the **Settings → Folder Rules** section:
+
 - Enter comma-separated folder names: `Work, Personal, Do Not Touch`
 - Bookmarks inside these folders will be completely skipped during analysis
 
 ### Custom AI Instructions
 
 Add plain-English instructions like:
+
 ```
 Group all programming tutorials under 'Dev Resources'.
 Keep news and articles in a 'Reading' section.
@@ -129,7 +131,7 @@ BookmarkFlow/
 ## 🛠️ Troubleshooting
 
 | Problem | Solution |
-|---|---|
+| --- | --- |
 | "API key invalid" error | Double-check your key. For Gemini, it starts with `AIza`. Test via Settings → "Test Connection". |
 | "Empty response from AI" | Reduce batch size (e.g. to 20) in Settings. The model may be hitting context limits. |
 | Rate limit (429) errors | BookmarkFlow automatically retries with exponential backoff. Wait a moment and try again. |
@@ -141,7 +143,7 @@ BookmarkFlow/
 ## 📜 Permissions Explained
 
 | Permission | Why it's needed |
-|---|---|
+| --- | --- |
 | `bookmarks` | Read your bookmark tree; create folders; move bookmarks |
 | `storage` | Save your API key and settings locally |
 | `sidePanel` | Allow the extension to open as a Chrome side panel |
@@ -156,6 +158,7 @@ BookmarkFlow/
 No build step required. Pure vanilla JS with ES modules.
 
 To make changes:
+
 1. Edit any `.js`, `.html`, or `.css` file
 2. Go to `chrome://extensions`
 3. Click the **🔄 refresh icon** on the BookmarkFlow card

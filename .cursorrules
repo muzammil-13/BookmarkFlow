@@ -1,0 +1,11 @@
+# AI Agent Rules for BookmarkFlow
+
+Always read `AGENT_INSTRUCTIONS.md` before starting any major task in this repository.
+
+Key rules:
+1. This is a Vanilla JS / CSS / HTML project. No bundlers, no React, no Tailwind.
+2. Manifest V3 constraints apply (no inline scripts, strict CSP).
+3. All state is managed in `popup.js`.
+4. All LLM calls happen in `api.js` with exponential backoff.
+5. All Chrome Bookmark API calls happen in `bookmarks.js`.
+6. Maintain the premium, dark-mode-first aesthetic in `popup.css`.
